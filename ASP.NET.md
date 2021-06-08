@@ -29,7 +29,7 @@ If we deploy a bad release, we can always go back and find the older version of 
 
 ### Deployment  
 The deployment process is handled by __Octupus__, with the following steps:  
-1. Configurations files are transformed and settings that may differ for different environment in injected such as database connection string or API keys.   
+1. Configurations files are transformed and settings that may differ for different environment is injected, such as database connection string or API keys.   
 2. The software code is uploaded to IIS.
 3. Database migration may be done here. The application may be taken offline temporarily.   
 
@@ -108,7 +108,7 @@ __Generate Octopus API Key__
 Jenkins will communicate with Octopus using an  _Octupus API key_. An _Octopus API Key_ can be generate using the Octopus web portal of your locally installed instance of Octopus deploy server:  
 * Start Octopus manager
 * Click on the link under `Octupus Web Port` and login to the web interface
-* Click on you login name on the top left > `Profile`
+* Click on your login name on the top left > `Profile`
 * Click on `My API Key` on the left navigation bar.  
 * Click `NEW API KEY` button to generate an API key.  
 * Copy and save your API key in a safe place.  
@@ -134,7 +134,7 @@ Here we add the Octupus API key we generated earlier to _Jenkins Global credenti
 * Click on the `Global credentials(unrestricted)` link on the content area.  
 * Click `Add Credentials` from the left navigation.
 * Select `Secret Text` for the `Kind` field selection
-* Enter the Octopus API Key for the `Secret` input box.
+* Enter the Octopus API Key in the `Secret` input box.
 * Enter a memorable name for the ID input field  e.g 'OctopusAPIKey'
 * Click `Ok`
 
@@ -196,10 +196,26 @@ __Create Octopus environment__
 * Click on the `Environments` link on the left navigation bar
 * Click the `ADD ENVIRONMENT` button in the content area
 * Enter the environment name `Dev` and click `Save`
-* Repeat for `Test` and `Prod` environments.  
+* Repeat for `Test` and `Prod` environments.   
+
+__Create the Octopus deployment project__  
+* Click on the `Projects` menu and then `ADD PROJECT` button at the top right
+* Enter you Project name and click `SAVE`
+* Click `Variables` link on the navigation bar
+* Add as many variables as needed. A variable should be some parameter that varies for each environment such as database connection string.
+  * You can use `#{Octopus.Environment.Name}` as value of a variable to dynamically reference the environment name for each environment. e.g `EnvName=#{Octopus.Environment.Name}`
+  * You can define a single variable and scope different values of that variable to different environments. e.g IIS Port as a variable name and different port number for different environments.  
+* Click on link `Deployments`  > `Overview` > `DEFINE YOUR DEPLOYMENT PROCESS`
+* Click the `ADD STEP` button
+* Select `Windows Server` and click `Deploy to IIS`
+* Enter a descriptive name for your selected step.
+* Select a web role that marches one registered by your Tentacle. That is `web` in our case.
+* Select the package ID e.g `MyApp`.
+  * This is ID of package that was pushed to Octopus repository by Jenkins  
+* Enter your website details and click `SAVE` button
 
 __Configure the Deployment Targets__  
-Remember that you _Tantacle Manager_ which was installed as a prerequisite sits on each and every of your target machine.   
+Remember that your _Tantacle Manager_ which was installed as a prerequisite sits on each and every of your target machine.   
 * Start the _Tantacle Manager_ from your start menu
 * Add a New Tentacle and click on the `GET STARTED` button  
 * For _Communication Style_ use `Polling Tentacle` and click `NEXT`.
@@ -211,23 +227,7 @@ Remember that you _Tantacle Manager_ which was installed as a prerequisite sits 
 * Select the environment you want you Tentacle to poll from or listen to.
 * Choose or create a roll say `web` and click `NEXT`
 * Leave `Tenants` and `Tenant tags` blank
-* Finally, click `Install` to install your newly configured Tentacle.  
-
-__Create the Octopus deployment project__  
-* Click on the `Projects` menu and then `ADD PROJECT` button at the top right
-* Enter you Project name and click `SAVE`
-* Click `Variables` link on the navigation bar
-* Add as many variables as needed. A variable should be some parameter that varies for each environment such as database connection string.
-  * Use can use `#{Octopus.Environment.Name}` as value of a variable to dynamically reference the environment name for each environment. e.g `EnvName=#{Octopus.Environment.Name}`
-  * You can define a single variable an scope different values of that variable to different environments. e.g IIS Port as a variable name and different port number for different environments.  
-* Click on link `Deployments`  > `Overview` > `DEFINE YOUR DEPLOYMENT PROCESS`
-* Click the `ADD STEP` button
-* Select `Windows Server` and click `Deploy to IIS`
-* Enter a descriptive name for your selected step.
-* Select a web role that marches one registered by your Tentacle. That is `web` in our case.
-* Select the package ID e.g `MyApp`.
-  * This is ID of package that was pushed to Octopus repository by Jenkins  
-* Enter your website details and click `SAVE` button
+* Finally, click `Install` to install your newly configured Tentacle.
 
 __Create an Octopus Release__
 * Click on the `Release` link on the left navigation bar
@@ -236,5 +236,6 @@ __Create an Octopus Release__
   * You may also enter a release note.
 * Click `SAVE` button
 * On the release screen you can select the environment you want to deploy to. You can also configure the lifecycle for progression of deployment through environments.
-* Click on the `DEPLOY` or `DEPLOY TO DEV` button to do a manually deployment to `Dev` environment.
-* Deploy to `Dev` will be automated on the next Jenkins build.  
+* Click on the `DEPLOY` or `DEPLOY TO DEV` button to do a manually deployment to `Dev` environment.  
+
+__Continuous deployments__
